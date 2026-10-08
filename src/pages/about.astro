@@ -1,0 +1,25 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="about · oddly" description="oddly 是什么">
+  <article class="about">
+    <h1>关于 oddly</h1>
+    <p>
+      oddly 每天从 X 时间线上捞出一批新奇的东西——新产品发布、新 AI 模型、
+      有意思的点子或工具。不是严格的新闻摘要，更接近"诶，这个有点意思"的
+      好奇心收藏。
+    </p>
+    <p>
+      没有算法推荐，只是 Max 的时间线加上一点筛选。
+    </p>
+    <p class="back"><a href="/">← 返回 feed</a></p>
+  </article>
+</BaseLayout>
+
+<style>
+  .about { padding: 2rem 0; max-width: 60ch; }
+  h1 { font-size: 1.75rem; margin-bottom: 1.5rem; }
+  p { color: var(--ink-soft); }
+  .back { margin-top: 2rem; }
+  .back a { color: var(--ink-faint); text-decoration: none; }
+</style>

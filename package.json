@@ -1,0 +1,21 @@
+{
+  "name": "oddly",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "每日从 X 时间线筛选的新奇发现",
+  "type": "module",
+  "dependencies": {
+    "@astrojs/markdown-remark": "^7.3.2",
+    "@astrojs/rss": "^4.0.19",
+    "astro": "^5.18.2",
+    "remark-gfm": "^4.0.1"
+  }
+}

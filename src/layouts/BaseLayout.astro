@@ -1,0 +1,94 @@
+---
+interface Props {
+  title?: string;
+  description?: string;
+}
+const { title = 'oddly', description = '每天从时间线上捞出来的新奇东西。' } = Astro.props;
+---
+<!doctype html>
+<html lang="zh">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔭</text></svg>" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/">oddly<span class="dot">.</span></a>
+      <nav>
+        <a href="/">feed</a>
+        <a href="/about/">about</a>
+      </nav>
+    </header>
+    <main>
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <p>oddly · 每天从 X 时间线上筛选的新奇发现 · <a href="https://oddly.maxoxo.me/rss.xml">RSS</a></p>
+    </footer>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    --bg: #0b0c0f;
+    --bg-soft: #131419;
+    --ink: #eef0f3;
+    --ink-soft: #a9adb8;
+    --ink-faint: #6c7080;
+    --accent: #7ee0c4;
+    --border: #22242c;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    --font-mono: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+    --measure: 720px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    line-height: 1.6;
+  }
+  .site-header {
+    max-width: var(--measure);
+    margin: 0 auto;
+    padding: 2rem 1.25rem 1rem;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+  .brand {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--ink);
+    text-decoration: none;
+    letter-spacing: -0.02em;
+  }
+  .brand .dot { color: var(--accent); }
+  .site-header nav a {
+    color: var(--ink-soft);
+    text-decoration: none;
+    font-size: 0.85rem;
+    margin-left: 1.25rem;
+  }
+  .site-header nav a:hover { color: var(--ink); }
+  main {
+    max-width: var(--measure);
+    margin: 0 auto;
+    padding: 0.5rem 1.25rem 4rem;
+    min-height: 60vh;
+  }
+  .site-footer {
+    max-width: var(--measure);
+    margin: 0 auto;
+    padding: 2rem 1.25rem 3rem;
+    color: var(--ink-faint);
+    font-size: 0.8rem;
+    border-top: 1px solid var(--border);
+  }
+  .site-footer a { color: var(--ink-faint); }
+  a { color: var(--accent); }
+</style>

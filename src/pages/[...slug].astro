@@ -1,0 +1,62 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const CATEGORY_LABEL = {
+  product: '产品',
+  model: '模型',
+  tool: '工具',
+  idea: '点子',
+  other: '其他',
+};
+
+export async function getStaticPaths() {
+  const posts = await getCollection('posts');
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+---
+<BaseLayout title={`${post.data.title} · oddly`} description={post.data.description}>
+  <article class="post">
+    <div class="post-meta">
+      <span class="cat">{CATEGORY_LABEL[post.data.category] ?? post.data.category}</span>
+      <time datetime={post.data.date.toISOString()}>{post.data.date.toISOString().slice(0, 10)}</time>
+    </div>
+    <h1>{post.data.title}</h1>
+    {post.data.description && <p class="dek">{post.data.description}</p>}
+    <div class="body"><Content /></div>
+    <div class="links">
+      {post.data.tweet_url && <a href={post.data.tweet_url} target="_blank" rel="noopener">查看原推文 →</a>}
+      {post.data.source && <a href={post.data.source} target="_blank" rel="noopener">相关链接 →</a>}
+    </div>
+    <p class="back"><a href="/">← 返回 feed</a></p>
+  </article>
+</BaseLayout>
+
+<style>
+  .post-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--ink-faint);
+    margin: 2rem 0 1rem;
+  }
+  .cat {
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.1rem 0.6rem;
+  }
+  h1 { font-size: 2rem; line-height: 1.2; margin: 0 0 1rem; }
+  .dek { color: var(--ink-soft); font-size: 1.1rem; margin: 0 0 2rem; }
+  .body { font-size: 1.02rem; color: var(--ink); }
+  .links { margin-top: 2rem; display: flex; gap: 1.5rem; }
+  .back { margin-top: 3rem; }
+  .back a { color: var(--ink-faint); text-decoration: none; }
+</style>
