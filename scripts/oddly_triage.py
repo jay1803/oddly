@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Two-tier oddly triage classifier: Jev (fast, cheap) -> gpt-6-luna (semantic fallback).
+"""Two-tier oddly triage classifier: Jev (fast, cheap) -> Luna Decisions (semantic fallback).
 
 Mirrors feedbin-cli's jev_triage.py pattern (see that skill + the
 hermes-model-delegation skill) but for a binary novel/skip decision instead
@@ -9,9 +9,14 @@ Tier 1 (Jev): every candidate tweet gets a single `choice` question
 (novel/skip) in well under a second each. Low-confidence answers are
 escalated.
 
-Tier 2 (gpt-6-luna via `hermes chat`): only items Jev was unsure about
-(or answered with low confidence). Luna must commit to novel/skip, no
-unsure allowed.
+Tier 2 (GPT-6 Luna Decisions, via OpenRouter's `/alpha/decisions` endpoint —
+see the `luna-decisions` skill in jay1803/skills): only items Jev was unsure
+about (or answered with low confidence). This is a bounded typed-probability
+classification call, NOT a `hermes chat` generative call — Luna Decisions is
+purpose-built for exactly this novel/skip classification task and is cheaper
+than routing through ordinary chat. Content WRITING (title/description/body)
+still goes through ordinary `gpt-6-luna` chat in write_entry.py — only the
+judgment step uses Decisions.
 
 Usage:
     python3 oddly_triage.py tweets.json > results.json
@@ -21,26 +26,22 @@ tweets.json is a JSON array of objects, each with at minimum:
      "url": "...", "isRetweet": false}
 
 Output is a JSON array of:
-    {"id": ..., "label": "novel"|"skip", "tier": "jev"|"luna"|"error", "reason": "..."}
+    {"id": ..., "label": "novel"|"skip", "tier": "jev"|"luna_decisions"|"error", "reason": "..."}
 
 Requires:
 - ~/.config/jev/.env.local with API_KEY=... (TypeSafe/Jev API key)
-- hermes CLI reachable at $HERMES_BIN with openai-codex auth configured
-  for gpt-6-luna (see hermes-model-delegation skill)
+- OPENROUTER_API_KEY in environment or ~/.hermes/.env (for Luna Decisions)
 """
 import json
 import os
-import subprocess
 import sys
 import urllib.request
 import urllib.error
 
 JEV_ENV_FILE = os.environ.get("JEV_ENV_FILE", os.path.expanduser("~/.config/jev/.env.local"))
-HERMES_BIN = os.environ.get(
-    "HERMES_BIN", os.path.expanduser("~/.hermes/hermes-agent/venv/bin/hermes")
-)
-LUNA_MODEL = os.environ.get("LUNA_MODEL", "gpt-6-luna")
-LUNA_PROVIDER = os.environ.get("LUNA_PROVIDER", "openai-codex")
+HERMES_ENV_FILE = os.environ.get("HERMES_ENV_FILE", os.path.expanduser("~/.hermes/.env"))
+LUNA_DECISIONS_MODEL = os.environ.get("LUNA_DECISIONS_MODEL", "openai/gpt-6-luna-decisions")
+LUNA_DECISIONS_URL = "https://openrouter.ai/api/alpha/decisions"
 
 JEV_API_URL = "https://api.typesafe.ai/v1/systemone"
 
@@ -64,21 +65,13 @@ TRIAGE_INSTRUCTIONS = (
     "无实质文本、仅图片无说明的默认 skip。"
 )
 
-LUNA_PROMPT_TMPL = """你是 oddly 新奇发现筛选器的第二级裁判。这条推文被第一级快速分类器（Jev）标记为 unsure，现在需要你结合语义理解做最终判断：novel 或 skip（只能二选一，不能再回答 unsure）。
+LUNA_PROMPT_INSTRUCTIONS_TMPL = """你是 oddly 新奇发现筛选器的第二级裁判。这条推文被第一级快速分类器（Jev）标记为 unsure，现在需要你结合语义理解做最终判断：novel 或 skip（只能二选一）。
 
 ## 判断标准
 {instructions}
 
-## 待判断推文
-ID: {id}
-作者: {author} ({handle})
-是否转推: {is_retweet}
-正文: {text}
-
 ## Jev 第一级判断（供参考）
-novel 概率: {novel_prob}, unsure 概率: {unsure_prob}, skip 概率: {skip_prob}
-
-只输出严格 JSON，不要任何其他文字：{{"label": "novel|skip", "reason": "一句话中文理由"}}"""
+novel 概率: {novel_prob}, unsure 概率: {unsure_prob}, skip 概率: {skip_prob}"""
 
 
 def load_jev_api_key():
@@ -90,6 +83,20 @@ def load_jev_api_key():
             if line.startswith("API_KEY="):
                 return line.split("=", 1)[1].strip()
     raise RuntimeError(f"API_KEY not found in {JEV_ENV_FILE}")
+
+
+def load_openrouter_api_key():
+    if os.environ.get("OPENROUTER_API_KEY"):
+        return os.environ["OPENROUTER_API_KEY"]
+    if os.path.exists(HERMES_ENV_FILE):
+        with open(HERMES_ENV_FILE) as f:
+            for line in f:
+                line = line.strip()
+                if line.startswith("OPENROUTER_API_KEY="):
+                    return line.split("=", 1)[1].strip().strip('"').strip("'")
+    raise RuntimeError(
+        f"OPENROUTER_API_KEY not found in environment or {HERMES_ENV_FILE}"
+    )
 
 
 def jev_classify(item, api_key):
@@ -132,38 +139,54 @@ def jev_classify(item, api_key):
     }
 
 
-def luna_classify(item, jev_result):
+def luna_decisions_classify(item, jev_result, openrouter_key):
     probs = jev_result.get("probabilities", {})
-    prompt = LUNA_PROMPT_TMPL.format(
+    instructions = LUNA_PROMPT_INSTRUCTIONS_TMPL.format(
         instructions=TRIAGE_INSTRUCTIONS,
-        id=item.get("id"),
-        author=item.get("author", ""),
-        handle=item.get("handle", ""),
-        is_retweet=item.get("isRetweet", False),
-        text=item.get("text", ""),
         novel_prob=probs.get("novel", "?"),
         unsure_prob=probs.get("unsure", "?"),
         skip_prob=probs.get("skip", "?"),
     )
-    result = subprocess.run(
-        [HERMES_BIN, "chat", "-q", prompt, "-m", LUNA_MODEL, "--provider", LUNA_PROVIDER, "-t", "", "-Q"],
-        capture_output=True,
-        text=True,
-        timeout=120,
+    state = (
+        f"作者: {item.get('author', '')} ({item.get('handle', '')})\n"
+        f"是否转推: {item.get('isRetweet', False)}\n"
+        f"正文: {item.get('text', '')}"
     )
-    out = result.stdout.strip()
-    lines = [l for l in out.split("\n") if not l.startswith("session_id:")]
-    answer_text = "\n".join(lines).strip()
+    payload = {
+        "model": LUNA_DECISIONS_MODEL,
+        "state": {"tweet": state},
+        "questions": {
+            "label": {
+                "type": "choice",
+                "instructions": instructions,
+                "criteria": {
+                    "novel": "值得发布：新产品/新模型/新工具/新点子",
+                    "skip": "不值得发布：闲聊/情绪/梗图/生活分享/广告/转发辩论",
+                },
+            }
+        },
+    }
+    req = urllib.request.Request(
+        LUNA_DECISIONS_URL,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={
+            "Authorization": f"Bearer {openrouter_key}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
     try:
-        parsed = json.loads(answer_text)
-        label = parsed.get("label", "unsure")
-        reason = parsed.get("reason", "")
-    except json.JSONDecodeError:
-        return "unsure", f"luna 返回非 JSON，需人工复核: {answer_text[:200]}"
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            body = json.loads(resp.read().decode("utf-8"))
+        answer = body["answers"]["label"]
+    except (urllib.error.URLError, KeyError, TimeoutError, json.JSONDecodeError) as e:
+        return "unsure", f"Luna Decisions 调用失败，需人工复核: {e}"
 
+    label = answer.get("choice")
+    confidence = answer.get("confidence")
     if label not in ("novel", "skip"):
-        return "unsure", reason or "Luna 仍无法在 novel/skip 间做出判断，按 unsure 保留"
-    return label, reason
+        return "unsure", "Luna Decisions 未能在 novel/skip 间给出有效选择，按 unsure 保留"
+    return label, f"Luna Decisions 判断（置信度 {confidence}）"
 
 
 def main():
@@ -175,6 +198,7 @@ def main():
         items = json.load(f)
 
     api_key = load_jev_api_key()
+    openrouter_key = load_openrouter_api_key()
     results = []
 
     for item in items:
@@ -200,9 +224,9 @@ def main():
                 }
             )
         else:
-            label, reason = luna_classify(item, jev_result)
+            label, reason = luna_decisions_classify(item, jev_result, openrouter_key)
             results.append(
-                {"id": item.get("id"), "label": label, "tier": "luna", "reason": reason}
+                {"id": item.get("id"), "label": label, "tier": "luna_decisions", "reason": reason}
             )
 
     print(json.dumps(results, ensure_ascii=False, indent=2))
