@@ -53,13 +53,18 @@ JEV_CONFIDENCE_FLOOR = float(os.environ.get("JEV_CONFIDENCE_FLOOR", "0.6"))
 # Kept in sync with references/triage-rules.md — if you edit the rules
 # there, update this instructions string too (and vice versa).
 TRIAGE_INSTRUCTIONS = (
-    "判断这条推文是否是「新奇的东西」：新产品发布、新功能上线、新 AI 模型"
-    "发布或重要 benchmark 突破、有意思的开源工具/小项目，或让人'诶这个有点"
-    "意思'的新点子/新角度。标准是好奇心驱动，不要求严格落在产品/模型范畴，"
-    "但必须是新的东西或新的信息，不是单纯观点、情绪、梗图、日常生活分享、"
-    "广告、政治社会评论或对他人观点的转发辩论。"
-    "壁纸/桌面主题/图标重绘类内容默认 skip，即使标题带'新品发布'字样也不算"
-    "——这是视觉分享，不是真正的产品/模型/工具发布。"
+    "判断这条推文是否值得发布（novel）：只有三类算 novel——①新产品发布"
+    "（实际可用/即将发布的软硬件产品、新功能上线）；②新技术（工程/技术"
+    "突破、新方法、新协议、新基础设施，非设计/视觉类）；③AI 技术相关更新"
+    "（新 AI 模型发布、benchmark 突破、训练方法、推理优化、AI 工具/框架的"
+    "技术性更新）。不属于这三类的，包括单纯有意思的点子、生活方式分享、"
+    "概念性讨论，都判 skip。"
+    "设计作品类内容一律 skip：壁纸、桌面主题、图标重绘、UI/UX 设计分享、"
+    "作品集展示、字体设计、海报、插画、品牌视觉、Logo 重设计，以及设计工具"
+    "的用法展示/灵感类帖子。即使标题带'新品发布'等字样，只要内容本质是视觉/"
+    "设计作品展示而非产品/技术本体，都判 skip。"
+    "其他 skip 情形：日常闲聊、情绪表达、梗图、单纯转推他人观点、个人生活"
+    "分享、纯广告、政治社会评论（除非直接是产品/模型新闻）。"
     "转推（isRetweet=true）默认优先级降低，但如果转推内容本身是官方账号发布"
     "的产品/模型消息，仍可判 novel。"
     "官方科技公司账号（OpenAI、Anthropic、Google DeepMind 等）的产品/模型"
@@ -115,8 +120,8 @@ def jev_classify(item, api_key):
                 "type": "choice",
                 "instructions": TRIAGE_INSTRUCTIONS,
                 "criteria": {
-                    "novel": "高置信度新奇：新产品/新模型/新工具/新点子",
-                    "skip": "高置信度不新奇：闲聊/情绪/梗图/生活分享/广告/转发辩论",
+                    "novel": "高置信度值得发布：新产品/新技术/AI 技术更新（非设计作品）",
+                    "skip": "高置信度不值得发布：闲聊/情绪/梗图/生活分享/广告/转发辩论/设计作品类内容",
                     "unsure": "边缘情况、信息不足、难以判断",
                 },
             }
@@ -162,8 +167,8 @@ def luna_decisions_classify(item, jev_result, openrouter_key):
                 "type": "choice",
                 "instructions": instructions,
                 "criteria": {
-                    "novel": "值得发布：新产品/新模型/新工具/新点子",
-                    "skip": "不值得发布：闲聊/情绪/梗图/生活分享/广告/转发辩论",
+                    "novel": "值得发布：新产品/新技术/AI 技术更新（非设计作品）",
+                    "skip": "不值得发布：闲聊/情绪/梗图/生活分享/广告/转发辩论/设计作品类内容",
                 },
             }
         },
