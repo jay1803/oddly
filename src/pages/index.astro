@@ -20,13 +20,19 @@ const entries = await Promise.all(
 ---
 <BaseLayout title="oddly" description="每天从 X 时间线上筛选的新奇发现:新产品、新模型、有趣的点子。">
   <div class="hero">
-    <p class="hero-eyebrow">{posts.length} finds</p>
+    <p class="hero-eyebrow"><span id="visible-count">{posts.length}</span> finds</p>
     <h1 class="hero-title">时间线上的新奇玩意</h1>
     <p class="hero-dek">每天从 X 时间线筛选的新鲜发现——新产品、新 AI 模型、有意思的点子。没有算法，只是好奇心。</p>
   </div>
-  <div class="feed">
+  <div class="filter-tabs" role="tablist" aria-label="按类型筛选">
+    <button class="tab active" data-filter="all" role="tab" aria-selected="true">全部</button>
+    <button class="tab" data-filter="product" role="tab" aria-selected="false">产品</button>
+    <button class="tab" data-filter="tool" role="tab" aria-selected="false">工具</button>
+    <button class="tab" data-filter="model" role="tab" aria-selected="false">模型</button>
+  </div>
+  <div class="feed" id="feed">
     {entries.map(({ post, Content }) => (
-      <article class="card">
+      <article class="card" data-category={post.data.category}>
         <div class="card-meta">
           <span class="cat">{CATEGORY_LABEL[post.data.category] ?? post.data.category}</span>
           <time datetime={post.data.date.toISOString()}>
@@ -45,7 +51,41 @@ const entries = await Promise.all(
     ))}
   </div>
   {entries.length === 0 && <p class="empty">还没有条目。等明天的采集跑一轮。</p>}
+  <p class="empty" id="empty-filtered" style="display: none;">这个分类下还没有条目。</p>
 </BaseLayout>
+
+<script>
+  const tabs = document.querySelectorAll<HTMLButtonElement>('.tab');
+  const cards = document.querySelectorAll<HTMLElement>('.card');
+  const countEl = document.getElementById('visible-count');
+  const emptyEl = document.getElementById('empty-filtered');
+
+  function applyFilter(filter: string) {
+    let visible = 0;
+    cards.forEach((card) => {
+      const match = filter === 'all' || card.dataset.category === filter;
+      card.style.display = match ? '' : 'none';
+      if (match) visible++;
+    });
+    if (countEl) countEl.textContent = String(visible);
+    if (emptyEl) emptyEl.style.display = visible === 0 ? '' : 'none';
+    tabs.forEach((tab) => {
+      const active = tab.dataset.filter === filter;
+      tab.classList.toggle('active', active);
+      tab.setAttribute('aria-selected', String(active));
+    });
+    history.replaceState(null, '', filter === 'all' ? location.pathname : `?filter=${filter}`);
+  }
+
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', () => applyFilter(tab.dataset.filter || 'all'));
+  });
+
+  const initial = new URLSearchParams(location.search).get('filter');
+  if (initial && ['product', 'tool', 'model'].includes(initial)) {
+    applyFilter(initial);
+  }
+</script>
 
 <style>
   .hero { padding: 3rem 0 2rem; }
@@ -65,6 +105,30 @@ const entries = await Promise.all(
     margin: 0 0 1rem;
   }
   .hero-dek { color: var(--ink-soft); max-width: 56ch; margin: 0; }
+  .filter-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin: 0 0 2rem;
+    flex-wrap: wrap;
+  }
+  .tab {
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.4rem 1rem;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+  }
+  .tab:hover { color: var(--ink); border-color: var(--ink-faint); }
+  .tab.active {
+    color: var(--bg);
+    background: var(--accent);
+    border-color: var(--accent);
+    font-weight: 600;
+  }
   .feed { display: flex; flex-direction: column; gap: 1.5rem; }
   .card {
     border: 1px solid var(--border);
