@@ -27,12 +27,20 @@ const { Content } = await render(post);
     <h1>{post.data.title}</h1>
     {post.data.description && <p class="dek">{post.data.description}</p>}
     <div class="body"><Content /></div>
+    {post.data.tweet_url && (
+      <div class="tweet-embed">
+        <blockquote class="twitter-tweet" data-theme="dark" data-dnt="true">
+          <a href={post.data.tweet_url}></a>
+        </blockquote>
+      </div>
+    )}
     <div class="links">
-      {post.data.tweet_url && <a href={post.data.tweet_url} target="_blank" rel="noopener">查看原推文 →</a>}
+      {post.data.tweet_url && <a href={post.data.tweet_url} target="_blank" rel="noopener">原推文链接 →</a>}
       {post.data.source && <a href={post.data.source} target="_blank" rel="noopener">相关链接 →</a>}
     </div>
     <p class="back"><a href="/">← 返回 feed</a></p>
   </article>
+  {post.data.tweet_url && <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>}
 </BaseLayout>
 
 <style>
@@ -56,6 +64,14 @@ const { Content } = await render(post);
   h1 { font-size: 2rem; line-height: 1.2; margin: 0 0 1rem; }
   .dek { color: var(--ink-soft); font-size: 1.1rem; margin: 0 0 2rem; }
   .body { font-size: 1.02rem; color: var(--ink); }
+  .tweet-embed {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: center;
+  }
+  .tweet-embed :global(.twitter-tweet) {
+    margin: 0 auto !important;
+  }
   .links { margin-top: 2rem; display: flex; gap: 1.5rem; }
   .back { margin-top: 3rem; }
   .back a { color: var(--ink-faint); text-decoration: none; }
