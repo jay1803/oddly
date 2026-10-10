@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { buildAskChatGptUrl } from '../lib/ask-chatgpt';
 
 const CATEGORY_LABEL = {
   product: '产品',
@@ -45,6 +46,13 @@ const entries = await Promise.all(
         <div class="card-links">
           {post.data.tweet_url && <a href={post.data.tweet_url} target="_blank" rel="noopener">原推文</a>}
           {post.data.source && <a href={post.data.source} target="_blank" rel="noopener">链接</a>}
+          <a
+            class="ask-gpt"
+            href={buildAskChatGptUrl(post.data)}
+            target="_blank"
+            rel="noopener"
+            title="在 ChatGPT 中详细了解这条内容"
+          >✦ Ask ChatGPT</a>
           {post.data.author && <span class="author">· {post.data.author}</span>}
         </div>
       </article>
@@ -162,9 +170,23 @@ const entries = await Promise.all(
   .card-links {
     margin-top: 1rem;
     display: flex;
+    align-items: center;
     gap: 1rem;
     font-size: 0.85rem;
     flex-wrap: wrap;
+  }
+  .ask-gpt {
+    color: var(--accent);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.15rem 0.7rem;
+    font-size: 0.78rem;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .ask-gpt:hover {
+    border-color: var(--accent);
+    background: rgba(126, 224, 196, 0.08);
   }
   .author { color: var(--ink-faint); }
   .empty { color: var(--ink-faint); padding: 2rem 0; }

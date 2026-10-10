@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { buildAskChatGptUrl } from '../lib/ask-chatgpt';
 
 const CATEGORY_LABEL = {
   product: '产品',
@@ -37,6 +38,7 @@ const { Content } = await render(post);
     <div class="links">
       {post.data.tweet_url && <a href={post.data.tweet_url} target="_blank" rel="noopener">原推文链接 →</a>}
       {post.data.source && <a href={post.data.source} target="_blank" rel="noopener">相关链接 →</a>}
+      <a class="ask-gpt" href={buildAskChatGptUrl(post.data)} target="_blank" rel="noopener">✦ Ask ChatGPT →</a>
     </div>
     <p class="back"><a href="/">← 返回 feed</a></p>
   </article>
@@ -72,7 +74,8 @@ const { Content } = await render(post);
   .tweet-embed :global(.twitter-tweet) {
     margin: 0 auto !important;
   }
-  .links { margin-top: 2rem; display: flex; gap: 1.5rem; }
+  .links { margin-top: 2rem; display: flex; gap: 1.5rem; flex-wrap: wrap; align-items: center; }
+  .ask-gpt { color: var(--accent); }
   .back { margin-top: 3rem; }
   .back a { color: var(--ink-faint); text-decoration: none; }
 </style>
