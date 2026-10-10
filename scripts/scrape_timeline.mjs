@@ -1,6 +1,14 @@
 // Scrape X home timeline (For You + Following) via ego-browser.
 // Usage: ego-browser nodejs scripts/scrape_timeline.mjs
-// Prints JSON array of { id, author, handle, text, url, time, isReply, isRetweet } to stdout.
+// Prints JSON array of { id, author, handle, text, url, isRetweet,
+// replyCount, retweetCount, likeCount } to stdout.
+//
+// Engagement counts (reply/retweet/like) are extracted from each tweet
+// card's action buttons (data-testid="reply"/"retweet"/"like"). A
+// genuinely brand-new tweet can legitimately have low counts, so this is
+// a signal for the triage rules to weigh alongside other promo cues
+// (CTA language, bio reading "私信/DM for business"), not a standalone
+// hard filter — see references/triage-rules.md.
 const task = await taskSpace("scrape x timeline for oddly");
 const page = task.page("p1");
 
@@ -29,9 +37,32 @@ async function scrapeTab(tabUrl) {
         const authorName = userText.split('\n')[0] || null;
         const textEl = art.querySelector('[data-testid="tweetText"]');
         const text = textEl ? textEl.innerText : '';
-        const isRetweet = art.innerText.includes('Reposted') || art.innerText.startsWith('转推') ;
         const socialContext = art.querySelector('[data-testid="socialContext"]');
         const retweetFlag = !!socialContext && /repost|retweet|转推/i.test(socialContext.innerText || '');
+
+        function parseCount(t) {
+          if (!t) return 0;
+          t = t.trim();
+          if (!t) return 0;
+          const m = t.match(/^([\d.]+)([KkMm]?)$/);
+          if (!m) return 0;
+          let n = parseFloat(m[1]);
+          if (/[Kk]/.test(m[2])) n *= 1000;
+          if (/[Mm]/.test(m[2])) n *= 1000000;
+          return Math.round(n);
+        }
+        function metricFor(testid) {
+          const btn = art.querySelector('[data-testid="' + testid + '"]');
+          if (!btn) return 0;
+          const lines = (btn.innerText || '').split('\n').map(s => s.trim()).filter(Boolean);
+          const numLine = lines.find(l => /^[\d.]+[KkMm]?$/.test(l));
+          return parseCount(numLine);
+        }
+
+        const replyCount = metricFor('reply');
+        const retweetCount = metricFor('retweet');
+        const likeCount = metricFor('like');
+
         if (id && text) {
           out.push({
             id,
@@ -40,6 +71,9 @@ async function scrapeTab(tabUrl) {
             text,
             url,
             isRetweet: retweetFlag,
+            replyCount,
+            retweetCount,
+            likeCount,
           });
         }
       } catch (e) {
@@ -81,8 +115,35 @@ const followingItems = await page.evaluate(() => {
       const text = textEl ? textEl.innerText : '';
       const socialContext = art.querySelector('[data-testid="socialContext"]');
       const retweetFlag = !!socialContext && /repost|retweet|转推/i.test(socialContext.innerText || '');
+
+      function parseCount(t) {
+        if (!t) return 0;
+        t = t.trim();
+        if (!t) return 0;
+        const m = t.match(/^([\d.]+)([KkMm]?)$/);
+        if (!m) return 0;
+        let n = parseFloat(m[1]);
+        if (/[Kk]/.test(m[2])) n *= 1000;
+        if (/[Mm]/.test(m[2])) n *= 1000000;
+        return Math.round(n);
+      }
+      function metricFor(testid) {
+        const btn = art.querySelector('[data-testid="' + testid + '"]');
+        if (!btn) return 0;
+        const lines = (btn.innerText || '').split('\n').map(s => s.trim()).filter(Boolean);
+        const numLine = lines.find(l => /^[\d.]+[KkMm]?$/.test(l));
+        return parseCount(numLine);
+      }
+
+      const replyCount = metricFor('reply');
+      const retweetCount = metricFor('retweet');
+      const likeCount = metricFor('like');
+
       if (id && text) {
-        out.push({ id, author: authorName, handle, text, url, isRetweet: retweetFlag });
+        out.push({
+          id, author: authorName, handle, text, url, isRetweet: retweetFlag,
+          replyCount, retweetCount, likeCount,
+        });
       }
     } catch (e) {}
   }
