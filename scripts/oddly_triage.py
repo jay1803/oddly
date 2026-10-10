@@ -72,13 +72,37 @@ TRIAGE_INSTRUCTIONS = (
     "无实质文本、仅图片无说明的默认 skip。"
 )
 
-LUNA_PROMPT_INSTRUCTIONS_TMPL = """你是 oddly 新奇发现筛选器的第二级裁判。这条推文被第一级快速分类器（Jev）标记为 unsure，现在需要你结合语义理解做最终判断：novel 或 skip（只能二选一）。
+LUNA_PROMPT_INSTRUCTIONS_TMPL = """你是 oddly 新奇发现筛选器的第二级裁判。这条内容被第一级快速分类器（Jev）标记为 unsure，现在需要你结合语义理解做最终判断：novel 或 skip（只能二选一）。
 
 ## 判断标准
 {instructions}
 
 ## Jev 第一级判断（供参考）
 novel 概率: {novel_prob}, unsure 概率: {unsure_prob}, skip 概率: {skip_prob}"""
+
+
+def build_state(item):
+    """Build the Jev/Luna Decisions `state` text for one candidate.
+
+    Supports two item shapes:
+    - Tweet (from scrape_timeline.mjs / x_search): has `text`, optionally
+      `author`/`handle`/`isRetweet`.
+    - Feedbin article (from the feedbin triage cron's skip-candidate
+      export — see references/triage-rules.md "第三数据源"): has `title`
+      and `summary`, optionally `domain`.
+    Detected by presence of `text` (tweet) vs `title`+`summary` (article).
+    """
+    if "text" in item:
+        return (
+            f"作者: {item.get('author', '')} ({item.get('handle', '')})\n"
+            f"是否转推: {item.get('isRetweet', False)}\n"
+            f"正文: {item.get('text', '')}"
+        )
+    return (
+        f"标题: {item.get('title', '')}\n"
+        f"来源域名: {item.get('domain', '')}\n"
+        f"摘要: {item.get('summary', '')}"
+    )
 
 
 def load_jev_api_key():
@@ -107,11 +131,7 @@ def load_openrouter_api_key():
 
 
 def jev_classify(item, api_key):
-    state = (
-        f"作者: {item.get('author', '')} ({item.get('handle', '')})\n"
-        f"是否转推: {item.get('isRetweet', False)}\n"
-        f"正文: {item.get('text', '')}"
-    )
+    state = build_state(item)
     payload = {
         "state": state,
         "model": "jev-latest",
@@ -154,14 +174,10 @@ def luna_decisions_classify(item, jev_result, openrouter_key):
         unsure_prob=probs.get("unsure", "?"),
         skip_prob=probs.get("skip", "?"),
     )
-    state = (
-        f"作者: {item.get('author', '')} ({item.get('handle', '')})\n"
-        f"是否转推: {item.get('isRetweet', False)}\n"
-        f"正文: {item.get('text', '')}"
-    )
+    state = build_state(item)
     payload = {
         "model": LUNA_DECISIONS_MODEL,
-        "state": {"tweet": state},
+        "state": {"item": state},
         "questions": {
             "label": {
                 "type": "choice",
