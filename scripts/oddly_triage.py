@@ -70,6 +70,11 @@ TRIAGE_INSTRUCTIONS = (
     "官方科技公司账号（OpenAI、Anthropic、Google DeepMind 等）的产品/模型"
     "发布默认倾向 novel，除非纯营销话术没有实质信息。"
     "无实质文本、仅图片无说明的默认 skip。"
+    "互动数据（回复/转发/点赞数）辅助判断广告嫌疑：互动量极低（个位数）"
+    "且文案带明显推广/CTA语气（'免费试用''立即体验''私信咨询''现已开放'"
+    "等营销号召用语）的，倾向判 skip，这是广告信号。但互动量低不能单独"
+    "作为 skip 的充分条件——刚发布的新内容互动量低是正常的，要结合文案"
+    "语气和账号性质综合判断，不要仅凭低互动一刀切。"
 )
 
 LUNA_PROMPT_INSTRUCTIONS_TMPL = """你是 oddly 新奇发现筛选器的第二级裁判。这条内容被第一级快速分类器（Jev）标记为 unsure，现在需要你结合语义理解做最终判断：novel 或 skip（只能二选一）。
@@ -93,9 +98,17 @@ def build_state(item):
     Detected by presence of `text` (tweet) vs `title`+`summary` (article).
     """
     if "text" in item:
+        engagement = (
+            f"互动数据: 回复{item.get('replyCount', '未知')} / "
+            f"转发{item.get('retweetCount', '未知')} / "
+            f"点赞{item.get('likeCount', '未知')}"
+            if "replyCount" in item or "likeCount" in item or "retweetCount" in item
+            else "互动数据: 未知（此来源不提供互动数据，如 x_search）"
+        )
         return (
             f"作者: {item.get('author', '')} ({item.get('handle', '')})\n"
             f"是否转推: {item.get('isRetweet', False)}\n"
+            f"{engagement}\n"
             f"正文: {item.get('text', '')}"
         )
     return (
