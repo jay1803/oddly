@@ -1,0 +1,261 @@
+[
+  {
+    "id": "2112247046082363821",
+    "author": "Guillermo Rauch",
+    "handle": "@rauchg",
+    "text": "We open sourced a *really fast* HTML artifact builder. It's powered by libfx, making the agent durable.\n\nBuilding the low-level plumbing for v0 to survive server crashes, flaky LLMs, function limits was a huge pain.\n\nNow it's easy, free, and OSS: \nhttps://\nfx0.vercel.dev.\n\nPS: I",
+    "url": "https://x.com/rauchg/status/2112247046082363821",
+    "isRetweet": true,
+    "replyCount": 88,
+    "retweetCount": 42,
+    "likeCount": 675
+  },
+  {
+    "id": "2112217649438491083",
+    "author": "9to5Mac",
+    "handle": "@9to5mac",
+    "text": "What to expect at Apple’s ‘Pro and tell’ event on Oct. 28:\n\n• Touchscreen OLED MacBook Pro with Dynamic Island, M5 Pro/Max and a much lighter build\n\n• OLED iPad mini with new speakers and a relocated FaceTime camera\n\n• M6 iMac and entry-level 14\" MacBook Pro (same designs as",
+    "url": "https://x.com/9to5mac/status/2112217649438491083",
+    "isRetweet": false,
+    "replyCount": 19,
+    "retweetCount": 63,
+    "likeCount": 678
+  },
+  {
+    "id": "2112232433768878374",
+    "author": "Udara",
+    "handle": "@TGUPJ",
+    "text": "closing the loop between human feedback and product improvement. pretty satisfying watching the pieces come together in signal~",
+    "url": "https://x.com/TGUPJ/status/2112232433768878374",
+    "isRetweet": false,
+    "replyCount": 4,
+    "retweetCount": 3,
+    "likeCount": 108
+  },
+  {
+    "id": "2112228033323311562",
+    "author": "Animate UI",
+    "handle": "@animate_ui",
+    "text": "Animate UI 2.0 just shipped, and there's already something new 👀\n\nIntroducing Page Transition, built on view transitions:\n✔ 10 effects + random\n✔ Shared elements morphing between pages\n✔ Next.js, React Router & TanStack Router\n✔ The skill uses it and can create new effects",
+    "url": "https://x.com/animate_ui/status/2112228033323311562",
+    "isRetweet": false,
+    "replyCount": 4,
+    "retweetCount": 5,
+    "likeCount": 57
+  },
+  {
+    "id": "2112258292135452820",
+    "author": "ElevenLabs",
+    "handle": "@ElevenLabs",
+    "text": "The Chroma Awards are back for Season 2. With $1M in free trials and promotions and over $450,000 in cash prizes and travel perks, it’s bigger than ever.\n\nSubmissions are now open.\n\nPresented in partnership with \n@capcutapp\n, \n@TheCantinaApp\n, and \n@runware\n.",
+    "url": "https://x.com/ElevenLabs/status/2112258292135452820",
+    "isRetweet": false,
+    "replyCount": 14,
+    "retweetCount": 89,
+    "likeCount": 102
+  },
+  {
+    "id": "2112212712306749537",
+    "author": "rico",
+    "handle": "@_heyrico",
+    "text": "thinking mode...",
+    "url": "https://x.com/_heyrico/status/2112212712306749537",
+    "isRetweet": false,
+    "replyCount": 5,
+    "retweetCount": 4,
+    "likeCount": 116
+  },
+  {
+    "id": "2112237132597330139",
+    "author": "Julie Zhuo",
+    "handle": "@joulee",
+    "text": "Love seeing the vision of @ekuydax \n@henrymodis\n and the whole team come to life! Finally collaborative AI!",
+    "url": "https://x.com/joulee/status/2112237132597330139",
+    "isRetweet": false,
+    "replyCount": 1,
+    "retweetCount": 2,
+    "likeCount": 5
+  },
+  {
+    "id": "2112245483464802700",
+    "author": "Emil Kowalski",
+    "handle": "@emilkowalski",
+    "text": "Long-form content is so much more pleasant and inviting to read at 18px or even 20px instead of 16px. \n\nMake your text big if you want it to be read.",
+    "url": "https://x.com/emilkowalski/status/2112245483464802700",
+    "isRetweet": false,
+    "replyCount": 21,
+    "retweetCount": 10,
+    "likeCount": 611
+  },
+  {
+    "id": "2112197878147874888",
+    "author": "Investors.com",
+    "handle": "@IBDinvestors",
+    "text": "Neoclouds: Goldman Sachs Upgrades CoreWeave. Microsoft Shelves Nscale Project.",
+    "url": "https://x.com/IBDinvestors/status/2112197878147874888",
+    "isRetweet": false,
+    "replyCount": 3,
+    "retweetCount": 0,
+    "likeCount": 3
+  },
+  {
+    "id": "2112225084551365093",
+    "author": "Point-Free",
+    "handle": "@pointfreeco",
+    "text": "This week we conclude our series by showing how to share isolation across boundaries! \n\nBy abstracting our nonisolated core with a protocol, isolated shells can scope down to subfeatures while retaining all the benefits of controlled isolation.\n\n\nhttps://\npointfree.co/episodes/ep384\n-designing-for-isolation-shared-isolation\n…",
+    "url": "https://x.com/pointfreeco/status/2112225084551365093",
+    "isRetweet": false,
+    "replyCount": 2,
+    "retweetCount": 0,
+    "likeCount": 12
+  },
+  {
+    "id": "2112255934919754029",
+    "author": "Evan",
+    "handle": "@StockMKTNewz",
+    "text": "Meta Platforms \n$META\n posted this today:\n\n“We trained our Muse foundational models, including Muse Wonder, at Prometheus, our gigawatt-scale supercluster in New Albany, Ohio.”",
+    "url": "https://x.com/StockMKTNewz/status/2112255934919754029",
+    "isRetweet": false,
+    "replyCount": 33,
+    "retweetCount": 25,
+    "likeCount": 294
+  },
+  {
+    "id": "2112190931126378871",
+    "author": "rauno",
+    "handle": "@raunofreiberg",
+    "text": "It's silly that this needs to be said but ...\n\nno matter how Cool your portfolio looks I will pass on it if your links are broken or it is janky on mobile",
+    "url": "https://x.com/raunofreiberg/status/2112190931126378871",
+    "isRetweet": false,
+    "replyCount": 32,
+    "retweetCount": 3,
+    "likeCount": 223
+  },
+  {
+    "id": "2112252441416675511",
+    "author": "Eric Alper 🎧",
+    "handle": "@ThatEricAlper",
+    "text": "SiriusXM is bringing fans every game of the 2026-27 NBA season, from Opening Night through the Finals. The action begins October 20 with Celtics-Pistons, Knicks-76ers and Thunder-Spurs on SiriusXM NBA Radio.",
+    "url": "https://x.com/ThatEricAlper/status/2112252441416675511",
+    "isRetweet": false,
+    "replyCount": 0,
+    "retweetCount": 0,
+    "likeCount": 1
+  },
+  {
+    "id": "2112268462269902895",
+    "author": "eric",
+    "handle": "@defyneric",
+    "text": "distribution is the last true moat remaining in fintech.\n\nthere's nothing special about offering ACH, wires, stablecoins, credit cards, or 2% cashback anymore.\n\nalmost every fintech has access to the same underlying financial infrastructure.\n\nthe products are becoming",
+    "url": "https://x.com/defyneric/status/2112268462269902895",
+    "isRetweet": false,
+    "replyCount": 7,
+    "retweetCount": 2,
+    "likeCount": 28
+  },
+  {
+    "id": "2112271040348844075",
+    "author": "DD",
+    "handle": "@jeazous",
+    "text": "very true",
+    "url": "https://x.com/jeazous/status/2112271040348844075",
+    "isRetweet": false,
+    "replyCount": 1,
+    "retweetCount": 0,
+    "likeCount": 1
+  },
+  {
+    "id": "2112264415026335907",
+    "author": "Isabel🌻",
+    "handle": "@isabelunraveled",
+    "text": "It’s so good for you to be thankful after a smooth travel day",
+    "url": "https://x.com/isabelunraveled/status/2112264415026335907",
+    "isRetweet": false,
+    "replyCount": 1,
+    "retweetCount": 0,
+    "likeCount": 5
+  },
+  {
+    "id": "2112195795675996561",
+    "author": "Jim Cramer",
+    "handle": "@jimcramer",
+    "text": "Jeez, cleaned out the sellers nicely. Very strong",
+    "url": "https://x.com/jimcramer/status/2112195795675996561",
+    "isRetweet": false,
+    "replyCount": 305,
+    "retweetCount": 269,
+    "likeCount": 1500
+  },
+  {
+    "id": "2112224781802348855",
+    "author": "Junch",
+    "handle": "@junchgaming",
+    "text": "I love game dev",
+    "url": "https://x.com/junchgaming/status/2112224781802348855",
+    "isRetweet": false,
+    "replyCount": 0,
+    "retweetCount": 0,
+    "likeCount": 3
+  },
+  {
+    "id": "2112244566082621461",
+    "author": "Jessie Char",
+    "handle": "@jessiechar",
+    "text": "I just gave birth in a way that lots of women seem opposed to—c-section, bright lights, room full of people talking over each other, resident-administered spinal block. I loved it! I get why people make birth plans but I found so much peace letting everything happen around me.",
+    "url": "https://x.com/jessiechar/status/2112244566082621461",
+    "isRetweet": false,
+    "replyCount": 2,
+    "retweetCount": 0,
+    "likeCount": 6
+  },
+  {
+    "id": "2112253212418027888",
+    "author": "Sebastiaan de With",
+    "handle": "@sdw",
+    "text": "congrats to you and you all Jessie!!!",
+    "url": "https://x.com/sdw/status/2112253212418027888",
+    "isRetweet": false,
+    "replyCount": 0,
+    "retweetCount": 0,
+    "likeCount": 1
+  },
+  {
+    "id": "2112212804979880239",
+    "author": "Eugenia Kuyda",
+    "handle": "@ekuyda",
+    "text": "Wabi 2.0 is live!\n\npersonal agents are one person, one chat. but the parts of life that matter run on more than one person\n\nWabi is an agent you use together. you talk to it, it does stuff, builds the apps you need, and anyone can join the thread - your partner, your best friend,",
+    "url": "https://x.com/ekuyda/status/2112212804979880239",
+    "isRetweet": false,
+    "replyCount": 186,
+    "retweetCount": 258,
+    "likeCount": 627
+  },
+  {
+    "id": "feedbin-5418840290",
+    "title": "The Bourgain Project",
+    "summary": "[This is a guest post by Lukas Liehr, João Pedro Ramos and Mitchell Taylor – T.] We are launching the Bourgain Project, a community-driven initiative to revisit, expand upon, and explore the body of work of Jean Bourgain, one of the most prolific",
+    "url": "https://terrytao.wordpress.com/2026/10/19/the-bourgain-project/",
+    "domain": "terrytao.wordpress.com"
+  },
+  {
+    "id": "feedbin-5418563896",
+    "title": "The Lean Educator Conference",
+    "summary": "Announcing a Lean Educators Conference. Teaching Lean in the Age of AI. November 18-19th at K&S Ranch, California. When AI hit our spring Lean Launchpad for Deep Tech class, our teaching team was unprepared for the impact it made on the class. What I",
+    "url": "https://steveblank.com/2026/10/19/the-lean-educator-conference/",
+    "domain": "steveblank.com"
+  },
+  {
+    "id": "feedbin-5418112538",
+    "title": "Starting a new journal",
+    "summary": "[This is a guest post by Shaoming Guo – T.] Several math colleagues and I are preparing to launch a new journal. As we considered which values we wanted the journal to uphold, we realized that there may be many other values worth exploring as a community,",
+    "url": "https://terrytao.wordpress.com/2026/10/17/starting-a-new-journal/",
+    "domain": "terrytao.wordpress.com"
+  },
+  {
+    "id": "feedbin-5418065512",
+    "title": "Monopoly Round-Up: Goodbye AI Bubble, Hello Real Economy",
+    "summary": "As usual, there was a lot of corporate power-related news last week. Hollywood super-agents launched a campaign to break up the streamers, Dems are musing on doing corporate oversight after the midterms, and the Trump DOJ wants to settle the Apple",
+    "url": "https://www.thebignewsletter.com/p/monopoly-round-up-pop-the-damn-ai",
+    "domain": "www.thebignewsletter.com"
+  }
+]
