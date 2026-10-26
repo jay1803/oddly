@@ -34,6 +34,7 @@ Requires:
 """
 import json
 import os
+import socket
 import sys
 import urllib.request
 import urllib.error
@@ -215,7 +216,7 @@ def luna_decisions_classify(item, jev_result, openrouter_key):
         with urllib.request.urlopen(req, timeout=20) as resp:
             body = json.loads(resp.read().decode("utf-8"))
         answer = body["answers"]["label"]
-    except (urllib.error.URLError, KeyError, TimeoutError, json.JSONDecodeError) as e:
+    except (urllib.error.URLError, KeyError, TimeoutError, json.JSONDecodeError, socket.timeout, OSError) as e:
         return "unsure", f"Luna Decisions 调用失败，需人工复核: {e}"
 
     label = answer.get("choice")
@@ -240,7 +241,7 @@ def main():
     for item in items:
         try:
             jev_result = jev_classify(item, api_key)
-        except (urllib.error.URLError, KeyError, TimeoutError) as e:
+        except (urllib.error.URLError, KeyError, TimeoutError, socket.timeout, OSError) as e:
             results.append(
                 {"id": item.get("id"), "label": "unsure", "tier": "error",
                  "reason": f"Jev 调用失败，需人工复核: {e}"}
