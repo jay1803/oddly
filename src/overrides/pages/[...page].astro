@@ -1,4 +1,5 @@
 ---
+import { byDateDesc } from 'astro-reading-theme/lib/sort.ts';
 import { getCollection, render } from 'astro:content';
 import BaseLayout from 'astro-reading-theme/layouts/BaseLayout.astro';
 import InfiniteFeed from 'astro-reading-theme/components/InfiniteFeed.astro';
@@ -6,9 +7,7 @@ import CategoryTabs from '../../components/CategoryTabs.astro';
 import { FEED_PAGE_SIZE } from '../../lib/feed';
 
 export async function getStaticPaths({ paginate }) {
-  const posts = (await getCollection('posts')).sort(
-    (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
-  );
+  const posts = (await getCollection('posts')).sort(byDateDesc);
   return paginate(posts, { pageSize: FEED_PAGE_SIZE });
 }
 
