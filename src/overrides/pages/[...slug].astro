@@ -1,11 +1,11 @@
 ---
 import { getCollection, render } from 'astro:content';
-import BaseLayout from '../layouts/BaseLayout.astro';
-import { base } from '../lib/base';
-import { buildAskChatGptUrl } from '../lib/ask-chatgpt';
-import { categoryLabel, formatDate } from '../lib/categories';
-import { isDekRedundant } from '../lib/dedupeDek';
-import { panguSpace } from '../lib/rehype-pangu.mjs';
+import BaseLayout from 'astro-reading-theme/layouts/BaseLayout.astro';
+import { base } from 'astro-reading-theme/lib/base.ts';
+import { buildAskChatGptUrl } from '../../lib/ask-chatgpt';
+import { categoryLabel, formatDate } from '../../lib/categories';
+import { isDekRedundant } from 'astro-reading-theme/lib/dedupeDek.ts';
+import { panguSpace } from 'astro-reading-theme/lib/rehype-pangu.mjs';
 
 export async function getStaticPaths() {
   const posts = await getCollection('posts');

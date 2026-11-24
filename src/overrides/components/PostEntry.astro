@@ -1,9 +1,9 @@
 ---
-import { base } from '../lib/base';
-import { buildAskChatGptUrl } from '../lib/ask-chatgpt';
-import { categoryLabel, formatDate } from '../lib/categories';
-import { isDekRedundant } from '../lib/dedupeDek';
-import { panguSpace } from '../lib/rehype-pangu.mjs';
+import { base } from 'astro-reading-theme/lib/base.ts';
+import { buildAskChatGptUrl } from '../../lib/ask-chatgpt';
+import { categoryLabel, formatDate } from '../../lib/categories';
+import { isDekRedundant } from 'astro-reading-theme/lib/dedupeDek.ts';
+import { panguSpace } from 'astro-reading-theme/lib/rehype-pangu.mjs';
 
 interface Props {
   post: {

@@ -1,9 +1,32 @@
 import { defineConfig } from 'astro/config';
 import remarkGfm from 'remark-gfm';
-import rehypePangu from './src/lib/rehype-pangu.mjs';
+import readingTheme from 'astro-reading-theme';
+import rehypePangu from 'astro-reading-theme/rehype-pangu';
 
 export default defineConfig({
   site: 'https://oddly.maxoxo.me',
+  integrations: [
+    readingTheme({
+      name: 'oddly',
+      lang: 'zh-CN',
+      description: '每天从 X 时间线和 Feedbin 筛选的新产品、新技术和 AI 更新。',
+      tagline: '新产品、新技术、AI 更新',
+      manifestDescription: '每天筛选的新产品、新技术和 AI 更新，支持离线阅读。',
+      rssDescription: '每天筛选的新产品、新技术和 AI 更新',
+      nav: [{ label: 'About', href: '/about/' }],
+      footerLink: { label: 'RSS', href: '/rss.xml' },
+      features: { category: true, author: false, domain: false, listen: false },
+      // Files below replace the theme's versions (keys relative to the theme's src/).
+      overrides: {
+        'components/PostEntry.astro': 'src/overrides/components/PostEntry.astro',
+        'pages/[...slug].astro': 'src/overrides/pages/[...slug].astro',
+        'pages/[...page].astro': 'src/overrides/pages/[...page].astro',
+        'pages/category/[category]/[...page].astro': 'src/overrides/pages/category/[category]/[...page].astro',
+        'pages/offline.astro': 'src/overrides/pages/offline.astro',
+        'lib/feed.ts': 'src/lib/feed.ts',
+      },
+    }),
+  ],
   markdown: {
     gfm: false,
     remarkPlugins: [[remarkGfm, { singleTilde: false }]],

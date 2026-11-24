@@ -1,9 +1,9 @@
 ---
 import { getCollection, render } from 'astro:content';
-import BaseLayout from '../layouts/BaseLayout.astro';
-import InfiniteFeed from '../components/InfiniteFeed.astro';
-import CategoryTabs from '../components/CategoryTabs.astro';
-import { FEED_PAGE_SIZE } from '../lib/feed';
+import BaseLayout from 'astro-reading-theme/layouts/BaseLayout.astro';
+import InfiniteFeed from 'astro-reading-theme/components/InfiniteFeed.astro';
+import CategoryTabs from '../../components/CategoryTabs.astro';
+import { FEED_PAGE_SIZE } from '../../lib/feed';
 
 export async function getStaticPaths({ paginate }) {
   const posts = (await getCollection('posts')).sort(
