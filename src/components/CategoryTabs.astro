@@ -1,0 +1,52 @@
+---
+import { base } from '../lib/base';
+import { TAB_CATEGORIES, categoryLabel } from '../lib/categories';
+
+interface Props {
+  active?: string;
+}
+const { active = 'all' } = Astro.props;
+const tabs = [
+  { key: 'all', label: '全部', href: `${base}/` },
+  ...TAB_CATEGORIES.map((c) => ({ key: c, label: categoryLabel(c), href: `${base}/category/${c}/` })),
+];
+---
+
+<nav class="tabs" aria-label="按类型筛选">
+  {
+    tabs.map((tab) => (
+      <a class:list={['tab', { active: tab.key === active }]} href={tab.href} aria-current={tab.key === active ? 'page' : undefined}>
+        {tab.label}
+      </a>
+    ))
+  }
+</nav>
+
+<style>
+  .tabs {
+    display: flex;
+    gap: 1.6rem;
+    max-width: var(--measure);
+    margin: 0 0 3.5rem;
+    padding-bottom: 0.9rem;
+    border-bottom: 1px solid var(--line);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .tab {
+    color: var(--ink-faint);
+    text-decoration: none;
+    padding-bottom: 0.9rem;
+    margin-bottom: -0.95rem;
+    border-bottom: 1px solid transparent;
+  }
+  .tab:hover {
+    color: var(--ink);
+  }
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+</style>

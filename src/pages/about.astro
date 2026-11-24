@@ -1,25 +1,47 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
-<BaseLayout title="about · oddly" description="oddly 是什么">
+
+<BaseLayout title="About — oddly">
   <article class="about">
+    <p class="about-eyebrow">About</p>
     <h1>关于 oddly</h1>
-    <p>
-      oddly 每天从 X 时间线上捞出一批新奇的东西——新产品发布、新 AI 模型、
-      有意思的点子或工具。不是严格的新闻摘要，更接近"诶，这个有点意思"的
-      好奇心收藏。
-    </p>
-    <p>
-      没有算法推荐，只是 Max 的时间线加上一点筛选。
-    </p>
-    <p class="back"><a href="/">← 返回 feed</a></p>
+    <div class="prose">
+      <p>oddly 收集新产品、新技术和 AI 更新。每一条都链接回原始出处，设计作品、闲聊和广告不收。</p>
+
+      <h2>它怎么运转</h2>
+      <p>采集任务每四小时运行一次，来源是我的 X 时间线和 Feedbin 里的产品发布类文章。
+      两级分类器先判断值不值得发布：先是 Jev，拿不准的再交给 GPT-6 Luna Decisions。
+      通过的条目由 Luna 写成简短的中文摘要，然后自动提交并发布到这里。</p>
+
+      <h2>离线阅读</h2>
+      <p>这是一个 PWA，可以添加到主屏幕。最近 50 条会保存在本机，没有网络也能读。
+      顶部的 Refresh 可以手动检查新内容。</p>
+
+      <h2>没有算法</h2>
+      <p>没有推荐，没有排序技巧，只有时间顺序和我的取舍。</p>
+    </div>
   </article>
 </BaseLayout>
 
 <style>
-  .about { padding: 2rem 0; max-width: 60ch; }
-  h1 { font-size: 1.75rem; margin-bottom: 1.5rem; }
-  p { color: var(--ink-soft); }
-  .back { margin-top: 2rem; }
-  .back a { color: var(--ink-faint); text-decoration: none; }
+  .about {
+    max-width: var(--measure);
+    padding: 4rem 0 6rem;
+  }
+  .about-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 1rem;
+  }
+  .about h1 {
+    font-size: clamp(2rem, 1.6rem + 1.6vw, 2.75rem);
+    line-height: 1.1;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    margin: 0 0 2rem;
+  }
 </style>

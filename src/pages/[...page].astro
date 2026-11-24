@@ -1,0 +1,83 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import InfiniteFeed from '../components/InfiniteFeed.astro';
+import CategoryTabs from '../components/CategoryTabs.astro';
+import { FEED_PAGE_SIZE } from '../lib/feed';
+
+export async function getStaticPaths({ paginate }) {
+  const posts = (await getCollection('posts')).sort(
+    (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+  );
+  return paginate(posts, { pageSize: FEED_PAGE_SIZE });
+}
+
+const { page } = Astro.props;
+const entries = await Promise.all(
+  page.data.map(async (post, i) => ({
+    post,
+    Content: (await render(post)).Content,
+    num: page.total - (page.start + i),
+  }))
+);
+---
+
+<BaseLayout title="oddly" description="每天从 X 时间线和 Feedbin 筛选的新产品、新技术和 AI 更新。">
+  <script is:inline>
+    // Legacy filter links (?filter=tool) now live on real category pages.
+    (function () {
+      var f = new URLSearchParams(location.search).get('filter');
+      if (f && /^(product|tool|model)$/.test(f)) location.replace('/category/' + f + '/');
+    })();
+  </script>
+  {
+    page.currentPage === 1 && (
+      <div class="hero">
+        <p class="hero-eyebrow">{page.total.toLocaleString()} finds</p>
+        <h1 class="hero-title">时间线上的新奇玩意。</h1>
+        <p class="hero-dek">新产品、新技术、AI 更新。没有算法，只有好奇心。</p>
+      </div>
+    )
+  }
+  {page.currentPage === 1 && <CategoryTabs active="all" />}
+  <InfiniteFeed entries={entries} nextUrl={page.url.next} total={page.total} />
+</BaseLayout>
+
+<style>
+  .hero {
+    max-width: var(--measure);
+    padding: 4.5rem 0 0.5rem;
+  }
+  .hero-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 1.5rem;
+  }
+  .hero-title {
+    font-size: clamp(2.25rem, 1.8rem + 2vw, 3.25rem);
+    line-height: 1.08;
+    font-weight: 400;
+    letter-spacing: -0.025em;
+    margin: 0 0 1.25rem;
+    text-wrap: balance;
+  }
+  .hero-dek {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    margin: 0 0 3rem;
+    max-width: 50ch;
+    text-wrap: pretty;
+  }
+  @media (max-width: 640px) {
+    .hero {
+      padding-top: 3rem;
+    }
+    .hero-dek {
+      margin-bottom: 2.5rem;
+    }
+  }
+</style>

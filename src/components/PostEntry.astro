@@ -1,0 +1,191 @@
+---
+import { base } from '../lib/base';
+import { buildAskChatGptUrl } from '../lib/ask-chatgpt';
+import { categoryLabel, formatDate } from '../lib/categories';
+import { isDekRedundant } from '../lib/dedupeDek';
+import { panguSpace } from '../lib/rehype-pangu.mjs';
+
+interface Props {
+  post: {
+    id: string;
+    data: {
+      title: string;
+      date: Date;
+      category: string;
+      description?: string;
+      source?: string;
+      tweet_url?: string;
+      author?: string;
+    };
+  };
+  Content: any;
+  num: number;
+}
+const { post, Content, num } = Astro.props;
+const { data } = post;
+const showDek = data.description && !isDekRedundant(post.id, data.description);
+---
+
+<article class="entry">
+  <div class="entry-eyebrow">
+    <span class="entry-num">{String(num).padStart(4, '0')}</span>
+    <span>{formatDate(data.date)}</span>
+    <span class="dot-rule"></span>
+    <a class="entry-cat" href={`${base}/category/${data.category}/`}>{categoryLabel(data.category)}</a>
+  </div>
+
+  <h2 class="entry-title"><a href={`${base}/${post.id}/`}>{panguSpace(data.title)}</a></h2>
+  {showDek && <p class="entry-dek">{panguSpace(data.description!)}</p>}
+
+  <div class="prose entry-content">
+    <Content />
+  </div>
+
+  <footer class="entry-foot">
+    <span class="entry-tags">
+      {data.author && <span>{data.author}</span>}
+      {
+        data.tweet_url && (
+          <>
+            {data.author && <span aria-hidden="true">&middot;</span>}
+            <a href={data.tweet_url} target="_blank" rel="noopener noreferrer">原推文 ↗</a>
+          </>
+        )
+      }
+      {
+        data.source && (
+          <>
+            {(data.author || data.tweet_url) && <span aria-hidden="true">&middot;</span>}
+            <a href={data.source} target="_blank" rel="noopener noreferrer">来源 ↗</a>
+          </>
+        )
+      }
+    </span>
+    <span class="entry-actions">
+      <a class="ask-gpt" href={buildAskChatGptUrl(data)} target="_blank" rel="noopener noreferrer" title="在 ChatGPT 中详细了解这条内容">✦ Ask ChatGPT</a>
+      <a class="permalink" href={`${base}/${post.id}/`}>Permalink</a>
+    </span>
+  </footer>
+
+  <div class="entry-divider" aria-hidden="true">
+    <span class="divider-rule"></span>
+    <span class="divider-dots">&middot;&middot;&middot;</span>
+    <span class="divider-rule"></span>
+  </div>
+</article>
+
+<style>
+  .entry {
+    max-width: var(--measure);
+    padding-bottom: 0.875rem;
+  }
+  .entry-eyebrow {
+    display: flex;
+    align-items: baseline;
+    gap: 0.875rem;
+    flex-wrap: wrap;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 1.25rem;
+  }
+  .entry-num {
+    color: var(--accent);
+  }
+  .entry-cat {
+    color: var(--ink-soft);
+    text-decoration: none;
+  }
+  .entry-cat:hover {
+    color: var(--accent);
+  }
+  .dot-rule {
+    width: 14px;
+    height: 1px;
+    background: var(--line);
+  }
+  .entry-title {
+    font-size: clamp(1.65rem, 1.4rem + 1vw, 2.25rem);
+    line-height: 1.15;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    margin: 0 0 1.1rem;
+    text-wrap: balance;
+  }
+  .entry-title a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .entry-title a:hover {
+    color: var(--accent);
+  }
+  .entry-dek {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    font-style: italic;
+    font-family: var(--font-em);
+    color: var(--ink-soft);
+    margin: 0 0 1.6rem;
+    text-wrap: pretty;
+  }
+  .entry-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    margin: 2rem 0 0;
+    padding-top: 1.35rem;
+    border-top: 1px solid var(--line);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  .entry-tags,
+  .entry-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem 1rem;
+    flex-wrap: wrap;
+  }
+  .entry-tags a {
+    color: var(--ink-soft);
+    text-decoration: none;
+  }
+  .entry-tags a:hover {
+    color: var(--ink);
+  }
+  .ask-gpt,
+  .permalink {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid var(--accent-soft);
+    padding-bottom: 2px;
+  }
+  .ask-gpt:hover,
+  .permalink:hover {
+    color: var(--ink);
+    border-color: var(--ink);
+  }
+  .entry-divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 3.5rem 0 4rem;
+    color: var(--ink-faint);
+  }
+  .divider-rule {
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+  }
+  .divider-dots {
+    font-size: 0.68rem;
+    letter-spacing: 0.5em;
+    color: var(--ink-faint);
+  }
+</style>

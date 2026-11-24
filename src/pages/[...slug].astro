@@ -1,15 +1,11 @@
 ---
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { base } from '../lib/base';
 import { buildAskChatGptUrl } from '../lib/ask-chatgpt';
-
-const CATEGORY_LABEL = {
-  product: '产品',
-  model: '模型',
-  tool: '工具',
-  idea: '点子',
-  other: '其他',
-};
+import { categoryLabel, formatDate } from '../lib/categories';
+import { isDekRedundant } from '../lib/dedupeDek';
+import { panguSpace } from '../lib/rehype-pangu.mjs';
 
 export async function getStaticPaths() {
   const posts = await getCollection('posts');
@@ -18,64 +14,162 @@ export async function getStaticPaths() {
 
 const { post } = Astro.props;
 const { Content } = await render(post);
+const { data } = post;
+const showDek = data.description && !isDekRedundant(post.id, data.description);
 ---
-<BaseLayout title={`${post.data.title} · oddly`} description={post.data.description}>
-  <article class="post">
-    <div class="post-meta">
-      <span class="cat">{CATEGORY_LABEL[post.data.category] ?? post.data.category}</span>
-      <time datetime={post.data.date.toISOString()}>{post.data.date.toISOString().slice(0, 10)}</time>
+
+<BaseLayout title={`${data.title} — oddly`} description={data.description}>
+  <a class="back-link" href={`${base}/`}>&larr; 返回首页</a>
+  <article class="single-entry">
+    <div class="entry-eyebrow">
+      <span>{formatDate(data.date)}</span>
+      <span class="dot-rule"></span>
+      <a href={`${base}/category/${data.category}/`}>{categoryLabel(data.category)}</a>
     </div>
-    <h1>{post.data.title}</h1>
-    {post.data.description && <p class="dek">{post.data.description}</p>}
-    <div class="body"><Content /></div>
-    {post.data.tweet_url && (
-      <div class="tweet-embed">
-        <blockquote class="twitter-tweet" data-theme="dark" data-dnt="true">
-          <a href={post.data.tweet_url}></a>
-        </blockquote>
-      </div>
-    )}
-    <div class="links">
-      {post.data.tweet_url && <a href={post.data.tweet_url} target="_blank" rel="noopener">原推文链接 →</a>}
-      {post.data.source && <a href={post.data.source} target="_blank" rel="noopener">相关链接 →</a>}
-      <a class="ask-gpt" href={buildAskChatGptUrl(post.data)} target="_blank" rel="noopener">✦ Ask ChatGPT →</a>
+    <h1 class="entry-title">{panguSpace(data.title)}</h1>
+    {showDek && <p class="entry-dek">{panguSpace(data.description!)}</p>}
+    <div class="prose">
+      <Content />
     </div>
-    <p class="back"><a href="/">← 返回 feed</a></p>
+    {
+      data.tweet_url && (
+        <div class="tweet-embed">
+          <blockquote class="twitter-tweet" data-dnt="true">
+            <a href={data.tweet_url}></a>
+          </blockquote>
+        </div>
+      )
+    }
+    <footer class="entry-foot">
+      <span class="entry-tags">
+        {data.author && <span>{data.author}</span>}
+        {
+          data.tweet_url && (
+            <>
+              {data.author && <span aria-hidden="true">&middot;</span>}
+              <a href={data.tweet_url} target="_blank" rel="noopener noreferrer">原推文 ↗</a>
+            </>
+          )
+        }
+        {
+          data.source && (
+            <>
+              {(data.author || data.tweet_url) && <span aria-hidden="true">&middot;</span>}
+              <a href={data.source} target="_blank" rel="noopener noreferrer">来源 ↗</a>
+            </>
+          )
+        }
+        <span aria-hidden="true">&middot;</span>
+        <a class="ask-gpt" href={buildAskChatGptUrl(data)} target="_blank" rel="noopener noreferrer">✦ Ask ChatGPT</a>
+      </span>
+    </footer>
   </article>
-  {post.data.tweet_url && <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>}
+  {
+    data.tweet_url && (
+      <script is:inline>
+        {`(function () {
+          var t = document.documentElement.dataset.theme ||
+            (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+          document.querySelectorAll('.twitter-tweet').forEach(function (el) { el.setAttribute('data-theme', t); });
+          var s = document.createElement('script');
+          s.async = true; s.charset = 'utf-8'; s.src = 'https://platform.twitter.com/widgets.js';
+          document.body.appendChild(s);
+        })();`}
+      </script>
+    )
+  }
 </BaseLayout>
 
 <style>
-  .post-meta {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
+  .back-link {
+    display: inline-block;
+    margin: 2rem 0 0;
     font-family: var(--font-mono);
-    font-size: 0.72rem;
-    color: var(--ink-faint);
-    margin: 2rem 0 1rem;
-  }
-  .cat {
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--accent);
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    padding: 0.1rem 0.6rem;
+    color: var(--ink-soft);
+    text-decoration: none;
   }
-  h1 { font-size: 2rem; line-height: 1.2; margin: 0 0 1rem; }
-  .dek { color: var(--ink-soft); font-size: 1.1rem; margin: 0 0 2rem; }
-  .body { font-size: 1.02rem; color: var(--ink); }
+  .back-link:hover {
+    color: var(--accent);
+  }
+  .single-entry {
+    max-width: var(--measure);
+    padding: 2.5rem 0 6rem;
+  }
+  .entry-eyebrow {
+    display: flex;
+    align-items: baseline;
+    gap: 0.875rem;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 1.5rem;
+  }
+  .entry-eyebrow a {
+    color: var(--ink-soft);
+    text-decoration: none;
+  }
+  .entry-eyebrow a:hover {
+    color: var(--accent);
+  }
+  .dot-rule {
+    width: 14px;
+    height: 1px;
+    background: var(--line);
+  }
+  .entry-title {
+    font-size: clamp(2rem, 1.6rem + 1.8vw, 3rem);
+    line-height: 1.12;
+    font-weight: 400;
+    letter-spacing: -0.022em;
+    margin: 0 0 1.1rem;
+    text-wrap: balance;
+  }
+  .entry-dek {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    font-style: italic;
+    font-family: var(--font-em);
+    color: var(--ink-soft);
+    margin: 0 0 2.5rem;
+    text-wrap: pretty;
+  }
   .tweet-embed {
-    margin-top: 2rem;
     display: flex;
     justify-content: center;
+    margin-top: 2rem;
   }
   .tweet-embed :global(.twitter-tweet) {
     margin: 0 auto !important;
   }
-  .links { margin-top: 2rem; display: flex; gap: 1.5rem; flex-wrap: wrap; align-items: center; }
-  .ask-gpt { color: var(--accent); }
-  .back { margin-top: 3rem; }
-  .back a { color: var(--ink-faint); text-decoration: none; }
+  .entry-foot {
+    margin: 3rem 0 0;
+    padding-top: 1.35rem;
+    border-top: 1px solid var(--line);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  .entry-tags {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.6rem 1rem;
+  }
+  .entry-tags a {
+    color: var(--ink-soft);
+    text-decoration: none;
+  }
+  .entry-tags a:hover {
+    color: var(--ink);
+  }
+  .entry-tags .ask-gpt {
+    color: var(--accent);
+  }
 </style>

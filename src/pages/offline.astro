@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { base } from '../lib/base';
+---
+
+<BaseLayout title="Offline — oddly">
+  <section class="offline">
+    <h1>这个页面还没有保存</h1>
+    <p>联网时打开过的页面会保存在本机，之后可以离线阅读。请联网后再打开这个页面，或回到已保存的首页。</p>
+    <a href={`${base}/`}>回到首页</a>
+  </section>
+</BaseLayout>
+
+<style>
+  .offline {
+    max-width: var(--measure);
+    min-height: 60vh;
+    padding: 5rem 0;
+  }
+  .offline h1 {
+    font-size: clamp(2rem, 1.6rem + 1.8vw, 3rem);
+    font-weight: 400;
+    line-height: 1.12;
+  }
+  .offline p {
+    color: var(--ink-soft);
+  }
+</style>

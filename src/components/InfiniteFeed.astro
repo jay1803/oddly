@@ -1,0 +1,217 @@
+---
+import PostEntry from './PostEntry.astro';
+
+interface Props {
+  entries: { post: any; Content: any; num: number }[];
+  nextUrl?: string | null;
+  total?: number;
+}
+const { entries, nextUrl, total } = Astro.props;
+---
+
+<div class="feed" data-feed data-next-url={nextUrl ?? ''}>
+  {entries.map(({ post, Content, num }) => <PostEntry post={post} Content={Content} num={num} />)}
+
+  <div class="feed-sentinel" data-sentinel></div>
+
+  <div class="feed-skeleton" data-skeleton hidden>
+    <div class="sk-line sk-eyebrow"></div>
+    <div class="sk-line sk-title"></div>
+    <div class="sk-line sk-title-short"></div>
+    <div class="sk-line sk-body"></div>
+    <div class="sk-line sk-body"></div>
+    <div class="sk-line sk-body-short"></div>
+  </div>
+
+  {
+    nextUrl ? (
+      <a class="feed-more" data-more-link href={nextUrl}>
+        Load older entries
+      </a>
+    ) : (
+      <div class="feed-end" data-end-message>
+        <p class="feed-end-label">End of the archive</p>
+        <p class="feed-end-note">
+          {total ? total.toLocaleString() : 'All'} entries, all of them still here.
+        </p>
+      </div>
+    )
+  }
+</div>
+
+<style>
+  .feed {
+    max-width: var(--measure);
+  }
+  .feed-sentinel {
+    height: 1px;
+  }
+
+  .feed-skeleton {
+    padding: 0 0 5rem;
+    animation: pulseFade 1.4s ease-in-out infinite;
+  }
+  .feed-skeleton[hidden] {
+    display: none;
+  }
+  .sk-line {
+    background: var(--line-soft);
+    border-radius: 2px;
+  }
+  .sk-eyebrow {
+    height: 10px;
+    width: 160px;
+    margin-bottom: 1.6rem;
+  }
+  .sk-title {
+    height: 30px;
+    width: 82%;
+    margin-bottom: 0.9rem;
+  }
+  .sk-title-short {
+    height: 30px;
+    width: 52%;
+    margin-bottom: 2rem;
+  }
+  .sk-body {
+    height: 12px;
+    margin-bottom: 0.9rem;
+  }
+  .sk-body-short {
+    height: 12px;
+    width: 68%;
+  }
+  @keyframes pulseFade {
+    0%,
+    100% {
+      opacity: 0.3;
+    }
+    50% {
+      opacity: 0.65;
+    }
+  }
+
+  .feed-more {
+    display: inline-block;
+    margin: 0.5rem 0 6rem;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: transparent;
+    border: 1px solid var(--accent-soft);
+    padding: 0.9rem 1.4rem;
+    text-decoration: none;
+    transition:
+      background 0.15s ease,
+      color 0.15s ease;
+  }
+  .feed-more:hover {
+    background: var(--accent);
+    color: var(--paper);
+    border-color: var(--accent);
+  }
+
+  .feed-end {
+    padding: 0 0 6rem;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  .feed-end-label {
+    margin: 0 0 0.6rem;
+  }
+  .feed-end-note {
+    margin: 0;
+    text-transform: none;
+    letter-spacing: 0;
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: var(--ink-soft);
+  }
+</style>
+
+<script>
+  function saveEntryPages(entries: Element[]) {
+    if (!('serviceWorker' in navigator)) return;
+    const urls = entries
+      .map((entry) => entry.querySelector<HTMLAnchorElement>('.entry-title a')?.href)
+      .filter((url): url is string => Boolean(url));
+    if (!urls.length) return;
+
+    navigator.serviceWorker.ready
+      .then((registration) => {
+        const worker = navigator.serviceWorker.controller || registration.active;
+        worker?.postMessage({ type: 'CACHE_POSTS', urls });
+      })
+      .catch(() => {});
+  }
+
+  function initFeed(feed: HTMLElement) {
+    const sentinel = feed.querySelector<HTMLElement>('[data-sentinel]');
+    const skeleton = feed.querySelector<HTMLElement>('[data-skeleton]');
+    const moreLink = feed.querySelector<HTMLAnchorElement>('[data-more-link]');
+    if (!sentinel) return;
+
+    let nextUrl = feed.dataset.nextUrl || '';
+    let loading = false;
+    saveEntryPages([...feed.querySelectorAll(':scope > .entry')]);
+
+    async function loadNext() {
+      if (loading || !nextUrl || !sentinel) return;
+      loading = true;
+      if (skeleton) skeleton.hidden = false;
+      try {
+        const res = await fetch(nextUrl);
+        if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
+        const html = await res.text();
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const nextFeed = doc.querySelector<HTMLElement>('[data-feed]');
+        if (!nextFeed) throw new Error('no feed in response');
+
+        const entries = [...nextFeed.querySelectorAll(':scope > .entry')];
+        entries.forEach((el) => {
+          sentinel && feed.insertBefore(el, sentinel);
+        });
+        saveEntryPages(entries);
+
+        nextUrl = nextFeed.dataset.nextUrl || '';
+        feed.dataset.nextUrl = nextUrl;
+
+        if (nextUrl) {
+          if (moreLink) moreLink.href = nextUrl;
+        } else {
+          const endMsg = nextFeed.querySelector('[data-end-message]');
+          if (endMsg) feed.appendChild(endMsg);
+          moreLink?.remove();
+          observer.disconnect();
+          sentinel.remove();
+        }
+      } catch {
+        // leave the manual "Load older entries" link as a fallback
+      } finally {
+        loading = false;
+        if (skeleton) skeleton.hidden = true;
+      }
+    }
+
+    const observer = new IntersectionObserver(
+      (observed) => {
+        if (observed.some((e) => e.isIntersecting)) loadNext();
+      },
+      { rootMargin: '600px 0px' }
+    );
+    observer.observe(sentinel);
+
+    moreLink?.addEventListener('click', (e) => {
+      e.preventDefault();
+      loadNext();
+    });
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-feed]').forEach(initFeed);
+</script>
