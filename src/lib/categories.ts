@@ -12,12 +12,3 @@ export const TAB_CATEGORIES = ['product', 'tool', 'model'] as const;
 export function categoryLabel(category: string): string {
   return CATEGORY_LABEL[category] ?? category;
 }
-
-export function formatDate(date: Date): string {
-  return date.toLocaleDateString('en-US', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    timeZone: 'UTC',
-  });
-}

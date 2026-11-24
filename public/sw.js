@@ -1,6 +1,8 @@
 // Pages are read from local storage first. Refresh is an explicit network update.
-const PAGE_CACHE = 'oddly-pages-v1';
-const SHELL_CACHE = 'oddly-shell-v1';
+// Bump both when the page markup changes (e.g. a theme redesign): pages are served
+// cache-first, so readers keep seeing old HTML until the page cache is replaced.
+const PAGE_CACHE = 'oddly-pages-v2';
+const SHELL_CACHE = 'oddly-shell-v2';
 const scope = new URL(self.registration.scope);
 const home = scope.pathname;
 const offline = `${home}offline/`;
@@ -67,7 +69,7 @@ self.addEventListener('activate', (event) => {
       caches.keys().then((keys) =>
         Promise.all(
           keys
-            .filter((key) => key.startsWith('oddly-shell-') && key !== SHELL_CACHE)
+            .filter((key) => key.startsWith('oddly-') && key !== SHELL_CACHE && key !== PAGE_CACHE)
             .map((key) => caches.delete(key))
         )
       ),

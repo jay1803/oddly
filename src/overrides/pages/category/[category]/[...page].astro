@@ -1,8 +1,13 @@
 ---
+// oddly's category feed: the theme's 0.3 page plus Chinese category labels, category tabs,
+// the site page size, and empty pages for every tab category.
 import { byDateDesc } from 'astro-reading-theme/lib/sort.ts';
+import site from 'virtual:astro-reading-theme/config';
 import { getCollection, render } from 'astro:content';
 import BaseLayout from 'astro-reading-theme/layouts/BaseLayout.astro';
 import InfiniteFeed from 'astro-reading-theme/components/InfiniteFeed.astro';
+import FeedBar from 'astro-reading-theme/components/FeedBar.astro';
+import { t } from 'astro-reading-theme/lib/i18n.ts';
 import CategoryTabs from '../../../../components/CategoryTabs.astro';
 import { FEED_PAGE_SIZE } from '../../../../lib/feed';
 import { TAB_CATEGORIES, categoryLabel } from '../../../../lib/categories';
@@ -24,51 +29,24 @@ export async function getStaticPaths({ paginate }) {
 const { category } = Astro.params;
 const { page } = Astro.props;
 const entries = await Promise.all(
-  page.data.map(async (post, i) => ({
-    post,
-    Content: (await render(post)).Content,
-    num: page.total - (page.start + i),
-  }))
+  page.data.map(async (post, i) => {
+    const { Content, headings } = await render(post);
+    return { post, Content, headings, num: page.total - (page.start + i) };
+  })
 );
 const label = categoryLabel(category);
 ---
 
-<BaseLayout title={`${label} — oddly`}>
+<BaseLayout title={`${label} — ${site.name}`}>
+  <FeedBar slot="subbar" entries={entries} total={page.total} />
   {
     page.currentPage === 1 && (
-      <div class="hero">
-        <p class="hero-eyebrow">{page.total.toLocaleString()} finds</p>
-        <h1 class="hero-title">{label}</h1>
-      </div>
+      <header class="page-head">
+        <p class="page-eyebrow">{t.inCategory(page.total, label)}</p>
+        <h1 class="page-title">{label}</h1>
+      </header>
     )
   }
   {page.currentPage === 1 && <CategoryTabs active={category} />}
   <InfiniteFeed entries={entries} nextUrl={page.url.next} total={page.total} />
 </BaseLayout>
-
-<style>
-  .hero {
-    max-width: var(--measure);
-    padding: 4.5rem 0 2.5rem;
-  }
-  .hero-eyebrow {
-    font-family: var(--font-mono);
-    font-size: 0.7rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--ink-faint);
-    margin: 0 0 1rem;
-  }
-  .hero-title {
-    font-size: clamp(2rem, 1.6rem + 1.6vw, 2.75rem);
-    line-height: 1.1;
-    font-weight: 400;
-    letter-spacing: -0.02em;
-    margin: 0;
-  }
-  @media (max-width: 640px) {
-    .hero {
-      padding-top: 3rem;
-    }
-  }
-</style>
