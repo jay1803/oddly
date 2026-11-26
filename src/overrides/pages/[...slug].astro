@@ -249,12 +249,11 @@ const sections = headings.filter((h) => h.depth === 2);
     border-top: 1px solid var(--rule);
     counter-reset: section;
   }
-  /* Each top-level section reads like a chapter: rule, number, title. */
+  /* Top-level sections get a number and title, but no rule: a rule per section made one
+     article read like several. */
   .post-body > :global(h2) {
     counter-increment: section;
     margin: 4.5rem 0 1.125rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--rule);
     font-size: 1.3em;
     line-height: 1.4;
     letter-spacing: -0.008em;
